@@ -32,6 +32,11 @@ const productPhotos={
  curry:{name:'Prato Frango Tandoori Curry',photos:['assets/products/curry-1.webp']}
 };
 productPhotos.rice={name:'Arroz de Camarão Cheeze',photos:['assets/products/rice-1.webp']};
+productPhotos['kebab-pizza']={name:'Kebab Pizza',photos:['assets/products/kebab-pizza.webp']};
+productPhotos['nuggets']={name:'Nuggets de Frango',photos:['assets/products/nuggets.webp']};
+productPhotos['onion-rings']={name:'Anéis de Cebola',photos:['assets/products/onion-rings.webp']};
+productPhotos['mozzarella']={name:'Palitos de Mozzarella',photos:['assets/products/mozzarella.webp']};
+productPhotos['chicken-beef']={name:'Chicken Beef Burger Menu',photos:['assets/products/chicken-beef.webp']};
 const dishDialog=document.querySelector('#dish-dialog');
 const dishPhoto=document.querySelector('#dish-photo');
 let videoWasPlaying=false;
