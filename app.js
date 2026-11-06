@@ -9,20 +9,22 @@ function render(){current+=(target-current)*.12;const mobile=innerWidth<550?.55:
 function update(){if(motion.matches)return;target=scrollY;if(!frame)frame=requestAnimationFrame(render)}
 addEventListener('scroll',update,{passive:true});addEventListener('resize',update,{passive:true});motion.addEventListener('change',()=>{if(motion.matches){cancelAnimationFrame(frame);frame=0;layers.forEach(layer=>layer.style.transform='')}else update()});update();
 
-const video=document.querySelector('#hero-video');
-const videoToggle=document.querySelector('#video-toggle');
-let manualPause=false;
-function syncVideo(){
- if(motion.matches){video.pause();video.removeAttribute('src');video.querySelector('source').removeAttribute('src');video.load();videoToggle.hidden=true;return}
- const source=video.querySelector('source');
- if(!source.getAttribute('src')){source.src=source.dataset.src;video.load()}
- videoToggle.hidden=false;
- if(!manualPause)video.play().catch(()=>{videoToggle.textContent='Reproduzir vídeo';videoToggle.setAttribute('aria-pressed','true')});
+const videoControllers=[];
+let dialogOpen=false;
+function setupVideo(video){
+ let visible=false;
+ function sync(){
+  if(motion.matches){video.pause();const source=video.querySelector('source');if(source.hasAttribute('src')){source.removeAttribute('src');video.load()}return}
+  if(!visible||dialogOpen||document.hidden){video.pause();return}
+  const source=video.querySelector('source');if(!source.hasAttribute('src')){source.src=source.dataset.src;video.load()}
+  video.play().catch(()=>{});
+ }
+ new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync()},{threshold:0.05}).observe(video);
+ motion.addEventListener('change',sync);document.addEventListener('visibilitychange',sync);
+ videoControllers.push({video,sync});sync();
 }
-videoToggle.addEventListener('click',()=>{manualPause=!video.paused;if(manualPause)video.pause();else video.play().catch(()=>{});videoToggle.textContent=manualPause?'Reproduzir vídeo':'Pausar vídeo';videoToggle.setAttribute('aria-pressed',String(manualPause))});
-video.addEventListener('playing',()=>{videoToggle.textContent='Pausar vídeo';videoToggle.setAttribute('aria-pressed','false')});
-video.addEventListener('error',()=>{videoToggle.hidden=true});
-motion.addEventListener('change',syncVideo);syncVideo();
+setupVideo(document.querySelector('#hero-video'));
+setupVideo(document.querySelector('#burger-video'));
 
 // Native modal: keyboard focus, Escape and focus restoration are handled by dialog.
 const productPhotos={
@@ -39,17 +41,17 @@ productPhotos['mozzarella']={name:'Palitos de Mozzarella',photos:['assets/produc
 productPhotos['chicken-burger']={name:'Chicken Burger Menu',photos:['assets/products/chicken-burger.webp']};
 const dishDialog=document.querySelector('#dish-dialog');
 const dishPhoto=document.querySelector('#dish-photo');
-let videoWasPlaying=false;
+
 document.querySelectorAll('[data-product]').forEach(button=>button.addEventListener('click',()=>{
  const product=productPhotos[button.dataset.product];
  document.querySelector('#dish-title').textContent=product.name;
  dishPhoto.src=product.photos[0];
  dishPhoto.alt=`${product.name} — imagem ilustrativa`;
- videoWasPlaying=!video.paused;video.pause();dishDialog.showModal();document.body.classList.add('dish-open');
+ dialogOpen=true;videoControllers.forEach(controller=>controller.sync());dishDialog.showModal();document.body.classList.add('dish-open');
 }));
 document.querySelector('.dish-close').addEventListener('click',()=>dishDialog.close());
 dishDialog.addEventListener('click',e=>{if(e.target===dishDialog)dishDialog.close()});
-dishDialog.addEventListener('close',()=>{document.body.classList.remove('dish-open');if(videoWasPlaying&&!motion.matches&&!manualPause)video.play().catch(()=>{})});
+dishDialog.addEventListener('close',()=>{document.body.classList.remove('dish-open');dialogOpen=false;videoControllers.forEach(controller=>controller.sync())});
 
 filters.forEach(button=>button.addEventListener('click',()=>{
  document.querySelectorAll('[data-photo-category]').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.photoCategory!==button.dataset.filter});
