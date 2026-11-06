@@ -23,3 +23,25 @@ videoToggle.addEventListener('click',()=>{manualPause=!video.paused;if(manualPau
 video.addEventListener('playing',()=>{videoToggle.textContent='Pausar vídeo';videoToggle.setAttribute('aria-pressed','false')});
 video.addEventListener('error',()=>{videoToggle.hidden=true});
 motion.addEventListener('change',syncVideo);syncVideo();
+
+// Native modal: keyboard focus, Escape and focus restoration are handled by dialog.
+const productPhotos={
+ burger:{name:'Double Cheese Burger Menu',photos:['assets/burger.webp']},
+ wrap:{name:'Frango Tenders Wrap Menu',photos:['assets/products/wrap-1.webp']},
+ pizza:{name:'Chicken Tikka Pizza',photos:['assets/products/pizza-1.webp']},
+ curry:{name:'Prato Frango Tandoori Curry',photos:['assets/products/curry-1.webp']}
+};
+productPhotos.rice={name:'Arroz de Camarão Cheeze',photos:['assets/products/rice-1.webp']};
+const dishDialog=document.querySelector('#dish-dialog');
+const dishPhoto=document.querySelector('#dish-photo');
+let videoWasPlaying=false;
+document.querySelectorAll('[data-product]').forEach(button=>button.addEventListener('click',()=>{
+ const product=productPhotos[button.dataset.product];
+ document.querySelector('#dish-title').textContent=product.name;
+ dishPhoto.src=product.photos[0];
+ dishPhoto.alt=`${product.name} — imagem ilustrativa`;
+ videoWasPlaying=!video.paused;video.pause();dishDialog.showModal();document.body.classList.add('dish-open');
+}));
+document.querySelector('.dish-close').addEventListener('click',()=>dishDialog.close());
+dishDialog.addEventListener('click',e=>{if(e.target===dishDialog)dishDialog.close()});
+dishDialog.addEventListener('close',()=>{document.body.classList.remove('dish-open');if(videoWasPlaying&&!motion.matches&&!manualPause)video.play().catch(()=>{})});
