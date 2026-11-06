@@ -45,3 +45,10 @@ document.querySelectorAll('[data-product]').forEach(button=>button.addEventListe
 document.querySelector('.dish-close').addEventListener('click',()=>dishDialog.close());
 dishDialog.addEventListener('click',e=>{if(e.target===dishDialog)dishDialog.close()});
 dishDialog.addEventListener('close',()=>{document.body.classList.remove('dish-open');if(videoWasPlaying&&!motion.matches&&!manualPause)video.play().catch(()=>{})});
+
+filters.forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('[data-photo-category]').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.photoCategory!==button.dataset.filter});
+ const hasPhotos=[...document.querySelectorAll('[data-photo-category]')].some(card=>!card.hidden);
+ document.querySelector('.product-showcase').hidden=!hasPhotos;
+ document.querySelector('.photo-note').hidden=!hasPhotos;
+}));
