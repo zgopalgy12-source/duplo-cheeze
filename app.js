@@ -36,7 +36,7 @@ productPhotos['kebab-pizza']={name:'Kebab Pizza',photos:['assets/products/kebab-
 productPhotos['nuggets']={name:'Nuggets de Frango',photos:['assets/products/nuggets.webp']};
 productPhotos['onion-rings']={name:'Anéis de Cebola',photos:['assets/products/onion-rings.webp']};
 productPhotos['mozzarella']={name:'Palitos de Mozzarella',photos:['assets/products/mozzarella.webp']};
-productPhotos['chicken-beef']={name:'Chicken Beef Burger Menu',photos:['assets/products/chicken-beef.webp']};
+productPhotos['chicken-burger']={name:'Chicken Burger Menu',photos:['assets/products/chicken-burger.webp']};
 const dishDialog=document.querySelector('#dish-dialog');
 const dishPhoto=document.querySelector('#dish-photo');
 let videoWasPlaying=false;
@@ -57,3 +57,21 @@ filters.forEach(button=>button.addEventListener('click',()=>{
  document.querySelector('.product-showcase').hidden=!hasPhotos;
  document.querySelector('.photo-note').hidden=!hasPhotos;
 }));
+
+const commentsButton=document.querySelector('#load-comments');
+const commentsStatus=document.querySelector('#comments-status');
+const commentsContainer=document.querySelector('#public-comments');
+commentsButton.addEventListener('click',()=>{
+ commentsContainer.replaceChildren();
+ commentsStatus.textContent='A carregar os comentários…';commentsButton.disabled=true;
+ const script=document.createElement('script');
+ script.src='https://utteranc.es/client.js';script.async=true;script.crossOrigin='anonymous';
+ script.setAttribute('repo','zgopalgy12-source/duplo-cheeze');script.setAttribute('issue-term','pathname');script.setAttribute('theme','github-light');
+ let timeout;
+ const failed=()=>{clearTimeout(timeout);commentsStatus.textContent='Não foi possível carregar os comentários. Tenta novamente dentro de instantes.';commentsButton.disabled=false;commentsButton.textContent='Tentar novamente'};
+ const observer=new MutationObserver(()=>{if(commentsContainer.querySelector('iframe')){clearTimeout(timeout);observer.disconnect();commentsStatus.textContent='Participa na conversa abaixo com a tua conta GitHub.';commentsButton.hidden=true}});
+ observer.observe(commentsContainer,{childList:true,subtree:true});
+ script.onerror=()=>{observer.disconnect();failed()};
+ timeout=setTimeout(()=>{observer.disconnect();failed()},15000);
+ commentsContainer.append(script);
+});
